@@ -10,6 +10,8 @@ Logiciels requis
 Usages
 
 pip install flask pytesseract opencv-python
+
+
 ouvrez app.py avec le bloc note et assurez-vous de remplacer <chemin_vers_tesseract_executable> par le chemin absolu vers l'exécutable de Tesseract OCR sur votre système.
 Lancez run.py avec visual community et levez les exeptions 
 
