@@ -1,8 +1,22 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, flash
 from PIL import Image
+from tkinter import filedialog
 import pytesseract 
 import cv2
+import PyPDF2
+import tkinter as tk
+
+nb_lignes = 24  # Définition de la valeur de nb_lignes
+nb_colonnes = 19 # Définition de la valeur de nb_colonnes
+window = tk.Tk()  # Définition de la variable window
+grid_frame = tk.Frame(window)  # Définition de la variable grid_frame
+text_entries = [[None for _ in range(nb_colonnes)] for _ in range(nb_lignes)]
+text_entries = [[None for _ in range(nb_colonnes)] for _ in range(nb_lignes)]
+
+
+
+
 
 app = Flask(__name__)
 
@@ -22,8 +36,63 @@ def extract_letters_from_image(image_path):
     _, threshold = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     return pytesseract.image_to_string(threshold, config='--psm 6')
 
-@app.route('/', methods=['GET', 'POST'])
-def home():
+def load_image_file(file_path):
+    try:
+        image = Image.open(file_path)
+        # Traitez l'image ici (extraire les informations de la grille)
+        # et mettez à jour l'interface utilisateur avec la grille chargée
+    except IOError:
+        print("Impossible de charger le fichier image")
+
+def load_pdf_file(file_path):
+    try:
+        with open(file_path, 'rb') as file:
+            pdf_reader = PyPDF2.PdfFileReader(file)
+            # Traitez le fichier PDF ici (extraire les informations de la grille)
+            # et mettez à jour l'interface utilisateur avec la grille chargée
+    except PyPDF2.PdfReadError:
+        print("Impossible de charger le fichier PDF")
+
+def open_file():
+    file_path = filedialog.askopenfilename(filetypes=[("Images", "*.jpg;*.png"), ("PDF Files", "*.pdf")])
+    if file_path:
+        if file_path.endswith('.pdf'):
+            load_pdf_file(file_path)
+        else:
+            load_image_file(file_path)
+
+def create_text_entries():
+    for row in range(nb_lignes):
+        for col in range(nb_colonnes):
+            entry = tk.Entry(grid_frame, width=2)
+            entry.grid(row=row, column=col)
+            # Ajouter les cases de texte à une liste ou une structure de données appropriée
+            # pour pouvoir y accéder et les mettre à jour ultérieurement
+            text_entries[row][col] = entry
+
+def get_user_letters():
+    letters = []
+    for row in range(nb_lignes):
+        row_letters = []
+        for col in range(nb_colonnes):
+            entry = text_entries[row][col]
+            letter = entry.get().upper()  # Convertir en majuscules
+            row_letters.append(letter)
+        letters.append(row_letters)
+    return letters
+
+def solve_grid():
+    # Obtenir les lettres saisies par l'utilisateur
+    user_letters = get_user_letters()
+    # Utiliser les lettres saisies pour résoudre la grille      
+
+def create_text_entries():
+    # Le contenu de la fonction ici
+
+
+ 
+ @app.route('/', methods=['GET', 'POST'])
+ def home():
     if request.method == 'POST':
         if 'file' not in request.files:
             flash('No file part')
@@ -45,5 +114,7 @@ def home():
             flash('Invalid file format')
             return redirect(request.url)
     return render_template('index.html')
+
+
 
 
